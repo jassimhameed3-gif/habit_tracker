@@ -11,20 +11,15 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
-  final _usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  final _passwordController = TextEditingController();
 
   final String defaultUsername = 'testuser';
+  final String defaultEmail = 'testuser@test.com';
   final String defaultPassword = 'password123';
 
   bool validateForm() {
-    final email = emailController.text.trim().isNotEmpty
-        ? emailController.text.trim()
-        : _usernameController.text.trim();
-    final password = passwordController.text.isNotEmpty
-        ? passwordController.text
-        : _passwordController.text;
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -32,10 +27,15 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return false;
     }
-    // If it looks like an email, check format. If username, accept it.
     if (email.contains('@') && !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a valid email')),
+      );
+      return false;
+    }
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 6 characters')),
       );
       return false;
     }
@@ -44,25 +44,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> authenticateUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final enteredEmail = emailController.text.trim().isNotEmpty
-        ? emailController.text.trim()
-        : _usernameController.text.trim();
-    final enteredPassword = passwordController.text.isNotEmpty
-        ? passwordController.text
-        : _passwordController.text;
+    final enteredEmail = emailController.text.trim().toLowerCase();
+    final enteredPassword = passwordController.text.trim();
 
-    // Keys saved from Sign up screen (Task 3) + default user
-    final storedEmail = prefs.getString('email') ?? prefs.getString('username') ?? '';
-    final storedUsername = prefs.getString('username') ?? '';
-    final storedPassword = prefs.getString('password') ?? '';
+    final storedEmail = (prefs.getString('email') ?? '').trim().toLowerCase();
+    final storedUsername = (prefs.getString('username') ?? '').trim().toLowerCase();
+    final storedPassword = (prefs.getString('password') ?? '').trim();
 
-    final isStoredUser = (enteredEmail == storedEmail ||
-            enteredEmail == storedUsername) &&
-        enteredPassword == storedPassword &&
-        storedPassword.isNotEmpty;
+    final isStoredUser = storedPassword.isNotEmpty &&
+        (enteredEmail == storedEmail || enteredEmail == storedUsername) &&
+        enteredPassword == storedPassword;
 
+    // FIXED: Accept both username AND email for default user
     final isDefaultUser = (enteredEmail == defaultUsername ||
-            enteredEmail == 'testuser') &&
+            enteredEmail == defaultEmail) &&
         enteredPassword == defaultPassword;
 
     if (isStoredUser || isDefaultUser) {
@@ -83,7 +78,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _login() => handleLogin();
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'Habitt',
+                  'Habit Tracker',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -117,11 +117,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextField(
-                    controller: _usernameController,
-                    onChanged: (v) => emailController.text = v,
+                    controller: emailController,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.email, color: Colors.blue.shade700),
-                      hintText: 'Enter Username',
+                      hintText: 'Enter Username or Email',
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                     ),
@@ -134,8 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextField(
-                    controller: _passwordController,
-                    onChanged: (v) => passwordController.text = v,
+                    controller: passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.lock, color: Colors.blue.shade700),
