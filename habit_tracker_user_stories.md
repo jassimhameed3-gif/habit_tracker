@@ -76,4 +76,86 @@ _As a user, I want to delete a habit I no longer need, so that my list stays cle
 ## US7: Set Reminders
 **Title:**
 _As a user, I want to set a reminder for a habit, so that I don't forget to do it._
-**Acceptance
+**Acceptance Criteria:**
+1. User can set time and days for reminder.
+2. Notification appears at the set time.
+3. User can turn reminder on/off.
+**Priority:** High
+**Story Points:** 3
+**Notes:**
+- Reminders use local notifications.
+
+## US8: View Habit Details
+**Title:**
+_As a user, I want to view the details of a habit, so that I can see its history and progress._
+**Acceptance Criteria:**
+1. User can tap a habit to open its Detail Screen.
+2. Detail Screen shows name, description, streak, and calendar history.
+3. User can edit or delete from Detail Screen.
+**Priority:** High
+**Story Points:** 3
+**Notes:**
+- Detail Screen is reached from Home Screen.
+
+## US9: Login / Register
+**Title:**
+_As a new user, I want to create an account and log in, so that my habits are saved to my account._
+**Acceptance Criteria:**
+1. User can register with email and password.
+2. User can log in with existing account.
+3. Error message appears for wrong email or password.
+4. User stays logged in until logout.
+**Priority:** High
+**Story Points:** 5
+**Notes:**
+- Login Screen is the first screen for logged-out users.
+
+## US10: Settings Menu
+**Title:**
+_As a user, I want to open a Settings Menu, so that I can change app preferences._
+**Acceptance Criteria:**
+1. User can open Settings Menu from Home Screen.
+2. Menu shows options: Profile, Notifications, Theme, About.
+3. Tapping an option opens its Settings Screen.
+**Priority:** Medium
+**Story Points:** 2
+**Notes:**
+- Settings Menu is accessible from all main screens.
+
+## US11: Change Settings
+**Title:**
+_As a user, I want to change app settings, so that the app fits my preferences._
+**Acceptance Criteria:**
+1. User can change theme (Light / Dark).
+2. User can turn all notifications on/off.
+3. User can change profile name.
+4. Settings are saved immediately.
+**Priority:** Medium
+**Story Points:** 3
+**Notes:**
+- Settings are saved per user.
+
+## US12: Persistent Data
+**Title:**
+_As a user, I want my habits and progress to be saved, so that I don't lose them when I close the app._
+**Acceptance Criteria:**
+1. All habits are saved to local database / cloud.
+2. Data is still there after closing and reopening the app.
+3. Completion history is not lost.
+**Priority:** High
+**Story Points:** 5
+**Notes:**
+- Data must persist across app restarts.
+
+## US13: External API Integration
+**Title:**
+_As a user, I want to connect my habit tracker to my calendar, so that my habits appear in my schedule._
+**Acceptance Criteria:**
+1. User can connect Google Calendar from Settings.
+2. Habit reminders appear as calendar events.
+3. Disconnecting removes calendar sync.
+**Priority:** Low
+**Story Points:** 8
+**Notes:**
+- Uses Google Calendar External API.
+-
