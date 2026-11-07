@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'login_screen.dart';
+import 'habit_tracker_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -36,29 +39,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _fetchCountries() async {
-    List<String> subsetCountries = [
-      'United States',
-      'Canada',
-      'United Kingdom',
-      'Australia',
-      'India',
-      'Germany',
-      'France',
-      'Japan',
-      'China',
-      'Brazil',
-      'South Africa'
-    ];
-
-    setState(() {
-      _countries = subsetCountries;
-      _countries.sort();
-      _country = _countries.isNotEmpty ? _countries[0] : 'United States';
-    });
+    try {
+      final response = await http.get(
+        Uri.parse('https://restcountries.com/v3.1/all?fields=name'),
+      );
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        final List<String> loaded = data
+            .map((e) => e['name']['common'].toString())
+            .toList();
+        loaded.sort();
+        setState(() {
+          _countries = loaded;
+          _country = _countries.contains('United States')
+              ? 'United States'
+              : _countries.first;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _countries = ['United States', 'Canada', 'United Kingdom'];
+        _country = 'United States';
+      });
+    }
   }
 
-  void _register() async {
-    print("registration logic here");
+  void _register() {
+    if (_nameController.text.trim().isEmpty ||
+        _usernameController.text.trim().isEmpty) {
+      Fluttertoast.showToast(msg: 'Please fill Name and Username');
+      return;
+    }
+    if (selectedHabits.isEmpty) {
+      Fluttertoast.showToast(msg: 'Please select at least one habit');
+      return;
+    }
+    Fluttertoast.showToast(msg: 'Registration Successful');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HabitTrackerScreen(
+          username: _usernameController.text.trim(),
+          name: _nameController.text.trim(),
+          selectedHabits: selectedHabits,
+        ),
+      ),
+    );
   }
 
   @override
@@ -130,7 +156,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: availableHabits.map((habit) {
                     final isSelected = selectedHabits.contains(habit);
                     return GestureDetector(
-                      onTap: () => null,
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            selectedHabits.remove(habit);
+                          } else {
+                            selectedHabits.add(habit);
+                          }
+                        });
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
@@ -210,7 +244,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         borderRadius: BorderRadius.circular(30),
       ),
       child: DropdownButton<String>(
-        value: _country,
+        value: _countries.contains(_country) ? _country : null,
+        hint: const Text('Select Country'),
         icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
         isExpanded: true,
         underline: const SizedBox(),
