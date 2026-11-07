@@ -80,8 +80,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       MaterialPageRoute(
         builder: (context) => HabitTrackerScreen(
           username: _usernameController.text.trim(),
-          name: _nameController.text.trim(),
-          selectedHabits: selectedHabits,
         ),
       ),
     );

@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful')),
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HabitTrackerScreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HabitTrackerScreen(username: enteredEmail)));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid email or password')),
