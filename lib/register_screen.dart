@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'country_list.dart';
 import 'login_screen.dart';
 import 'habit_tracker_screen.dart';
@@ -16,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   double _age = 25;
   String _country = 'United States';
+  List<String> _countries = [];
   List<String> selectedHabits = [];
   List<String> availableHabits = [
     'Wake Up Early',
@@ -30,23 +35,84 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Walk 10,000 Steps'
   ];
 
-  void _register() {
+  final Map<String, Color> _habitColors = {
+    'Amber': Colors.amber,
+    'Red Accent': Colors.redAccent,
+    'Light Blue': Colors.lightBlue,
+    'Light Green': Colors.lightGreen,
+    'Purple Accent': Colors.purpleAccent,
+    'Orange': Colors.orange,
+    'Teal': Colors.teal,
+    'Deep Purple': Colors.deepPurple,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCountries();
+  }
+
+  void _showToast(String msg) {
+    Fluttertoast.showToast(msg: msg);
+  }
+
+  Future<void> _loadCountries() async {
+    try {
+      List<String> countries = await fetchCountries();
+      setState(() {
+        _countries = countries;
+      });
+    } catch (e) {
+      _showToast('Error fetching countries');
+    }
+  }
+
+  void _toggleHabitSelection(String habit) {
+    setState(() {
+      if (selectedHabits.contains(habit)) {
+        selectedHabits.remove(habit);
+      } else {
+        selectedHabits.add(habit);
+      }
+    });
+  }
+
+  Future<void> _register() async {
     if (_nameController.text.trim().isEmpty ||
         _usernameController.text.trim().isEmpty) {
-      Fluttertoast.showToast(msg: 'Please fill Name and Username');
+      _showToast('Please fill Name and Username');
       return;
     }
     if (selectedHabits.isEmpty) {
-      Fluttertoast.showToast(msg: 'Please select at least one habit');
+      _showToast('Please select at least one habit');
       return;
     }
-    Fluttertoast.showToast(msg: 'Registration Successful');
+
+    final String name = _nameController.text.trim();
+    final String username = _usernameController.text.trim();
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map<String, String> selectedHabitsMap = {};
+    final random = Random();
+    final colorKeys = _habitColors.keys.toList();
+    for (var habit in selectedHabits) {
+      var randomColor =
+          _habitColors[colorKeys[random.nextInt(colorKeys.length)]]!;
+      selectedHabitsMap[habit] = randomColor.value.toRadixString(16);
+    }
+
+    await prefs.setString('name', name);
+    await prefs.setString('username', username);
+    await prefs.setDouble('age', _age);
+    await prefs.setString('country', _country);
+    await prefs.setString('selectedHabitsMap', jsonEncode(selectedHabitsMap));
+
+    _showToast('Registration Successful');
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HabitTrackerScreen(
-          username: _usernameController.text.trim(),
-        ),
+        builder: (context) => HabitTrackerScreen(username: username),
       ),
     );
   }
@@ -120,15 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: availableHabits.map((habit) {
                     final isSelected = selectedHabits.contains(habit);
                     return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedHabits.remove(habit);
-                          } else {
-                            selectedHabits.add(habit);
-                          }
-                        });
-                      },
+                      onTap: () => _toggleHabitSelection(habit),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
@@ -207,35 +265,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: FutureBuilder<List<String>>(
-        future: fetchCountries(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Text('No countries available');
-          } else {
-            List<String> countries = snapshot.data!;
-            return DropdownButton<String>(
-              value: countries.contains(_country) ? _country : countries.first,
-              icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
-              isExpanded: true,
-              underline: const SizedBox(),
-              items: countries.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (newValue) {
-                setState(() {
-                  _country = newValue!;
-                });
-              },
-            );
-          }
+      child: DropdownButton<String>(
+        value: _countries.contains(_country) ? _country : null,
+        hint: const Text('Select Country'),
+        icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
+        isExpanded: true,
+        underline: const SizedBox(),
+        items: _countries.map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            _country = newValue!;
+          });
         },
       ),
     );
