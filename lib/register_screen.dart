@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
+import 'country_list.dart';
 import 'login_screen.dart';
 import 'habit_tracker_screen.dart';
 
@@ -17,7 +16,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _usernameController = TextEditingController();
   double _age = 25;
   String _country = 'United States';
-  List<String> _countries = [];
   List<String> selectedHabits = [];
   List<String> availableHabits = [
     'Wake Up Early',
@@ -31,38 +29,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Journal',
     'Walk 10,000 Steps'
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCountries();
-  }
-
-  Future<void> _fetchCountries() async {
-    try {
-      final response = await http.get(
-        Uri.parse('https://restcountries.com/v3.1/all?fields=name'),
-      );
-      if (response.statusCode == 200) {
-        final List data = json.decode(response.body);
-        final List<String> loaded = data
-            .map((e) => e['name']['common'].toString())
-            .toList();
-        loaded.sort();
-        setState(() {
-          _countries = loaded;
-          _country = _countries.contains('United States')
-              ? 'United States'
-              : _countries.first;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _countries = ['United States', 'Canada', 'United Kingdom'];
-        _country = 'United States';
-      });
-    }
-  }
 
   void _register() {
     if (_nameController.text.trim().isEmpty ||
@@ -241,22 +207,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
       ),
-      child: DropdownButton<String>(
-        value: _countries.contains(_country) ? _country : null,
-        hint: const Text('Select Country'),
-        icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
-        isExpanded: true,
-        underline: const SizedBox(),
-        items: _countries.map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: (newValue) {
-          setState(() {
-            _country = newValue!;
-          });
+      child: FutureBuilder<List<String>>(
+        future: fetchCountries(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Text('No countries available');
+          } else {
+            List<String> countries = snapshot.data!;
+            return DropdownButton<String>(
+              value: countries.contains(_country) ? _country : countries.first,
+              icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
+              isExpanded: true,
+              underline: const SizedBox(),
+              items: countries.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  _country = newValue!;
+                });
+              },
+            );
+          }
         },
       ),
     );
