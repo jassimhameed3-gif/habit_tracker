@@ -21,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   double _age = 25;
   String _country = 'United States';
   List<String> _countries = [];
+  bool _isLoadingCountries = true;
   List<String> selectedHabits = [];
   List<String> availableHabits = [
     'Wake Up Early',
@@ -61,9 +62,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       List<String> countries = await fetchCountries();
       setState(() {
         _countries = countries;
+        _isLoadingCountries = false;
       });
     } catch (e) {
-      _showToast('Error fetching countries');
+      setState(() {
+        _countries = [
+          'Bahrain',
+          'Saudi Arabia',
+          'United Arab Emirates',
+          'Kuwait',
+          'Qatar',
+          'Oman',
+          'United States',
+          'United Kingdom',
+        ];
+        _isLoadingCountries = false;
+      });
+      _showToast('API failed, showing fallback list');
     }
   }
 
@@ -259,6 +274,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildCountryDropdown() {
+    if (_isLoadingCountries) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: const Text('Loading countries...'),
+      );
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
