@@ -43,6 +43,24 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
     await prefs.setString('completedHabitsMap', jsonEncode(completedHabitsMap));
   }
 
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Color _getColorFromHex(String hexColor) {
     hexColor = hexColor.replaceAll('#', '');
     if (hexColor.length == 6) {
@@ -86,13 +104,32 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
               decoration: BoxDecoration(
                 color: Colors.blue.shade700,
               ),
-              child: Text(
-                name.isNotEmpty ? name : widget.username,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white,
+                    child: Icon(Icons.person, size: 32, color: Colors.blue),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Hello, ${name.isNotEmpty ? name : widget.username}!',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    widget.username,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
             ListTile(
@@ -117,16 +154,87 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
                 });
               },
             ),
+            const Divider(),
+            const Padding(
+              padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),
+              child: Text(
+                'SETTINGS',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Logout'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Configure'),
               onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
-                );
+                Navigator.pop(context);
+                _showMessage('Configure settings');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Personal Info'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMessage('Hello, $name!');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart),
+              title: const Text('Reports'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMessage('Reports coming soon');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Notifications'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMessage('No new notifications');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.dark_mode),
+              title: const Text('Dark Mode'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMessage('Dark Mode toggled');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_applications),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                _showMessage('Settings');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.info),
+              title: const Text('About'),
+              onTap: () {
+                Navigator.pop(context);
+                showAboutDialog(
+                    context: context,
+                    applicationName: 'Habit Tracker',
+                    applicationVersion: '1.0.0');
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _logout();
               },
             ),
           ],
