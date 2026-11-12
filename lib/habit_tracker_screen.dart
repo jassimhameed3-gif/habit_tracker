@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'add_habit_screen.dart';
 import 'login_screen.dart';
+import 'personal_info_screen.dart';
+import 'reports_screen.dart';
 
 class HabitTrackerScreen extends StatefulWidget {
   final String username;
@@ -43,28 +45,10 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
     await prefs.setString('completedHabitsMap', jsonEncode(completedHabitsMap));
   }
 
-  Future<void> _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
   Color _getColorFromHex(String hexColor) {
     hexColor = hexColor.replaceAll('#', '');
     if (hexColor.length == 6) {
-      hexColor = 'FF$hexColor'; // Add opacity if not included.
+      hexColor = 'FF$hexColor';
     }
     return Color(int.parse('0x$hexColor'));
   }
@@ -78,7 +62,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
         print('Error parsing color for $habit: $e');
       }
     }
-    return Colors.blue; // Default color in case of error.
+    return Colors.blue;
   }
 
   @override
@@ -104,74 +88,28 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
               decoration: BoxDecoration(
                 color: Colors.blue.shade700,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, size: 32, color: Colors.blue),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Hello, ${name.isNotEmpty ? name : widget.username}!',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    widget.username,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('My Habits'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.add),
-              title: const Text('Add Habit'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddHabitScreen(),
-                  ),
-                ).then((_) {
-                  _loadUserData();
-                });
-              },
-            ),
-            const Divider(),
-            const Padding(
-              padding: EdgeInsets.only(left: 16, top: 8, bottom: 4),
-              child: Text(
-                'SETTINGS',
+              child: const Text(
+                'Menu',
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: Colors.white,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
             ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Configure'),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
-                _showMessage('Configure settings');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddHabitScreen(),
+                  ),
+                ).then((updatedHabits) {
+                  _loadUserData();
+                });
               },
             ),
             ListTile(
@@ -179,62 +117,36 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
               title: const Text('Personal Info'),
               onTap: () {
                 Navigator.pop(context);
-                _showMessage('Hello, $name!');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PersonalInfoScreen()),
+                ).then((_) {
+                  _loadUserData();
+                });
               },
             ),
             ListTile(
-              leading: const Icon(Icons.bar_chart),
+              leading: const Icon(Icons.analytics),
               title: const Text('Reports'),
               onTap: () {
                 Navigator.pop(context);
-                _showMessage('Reports coming soon');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ReportsScreen()),
+                );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text('Notifications'),
-              onTap: () {
-                Navigator.pop(context);
-                _showMessage('No new notifications');
-              },
+            const ListTile(
+              leading: Icon(Icons.notifications),
+              title: Text('Notifications'),
             ),
             ListTile(
-              leading: const Icon(Icons.dark_mode),
-              title: const Text('Dark Mode'),
+              leading: const Icon(Icons.logout),
+              title: const Text('Sign Out'),
               onTap: () {
-                Navigator.pop(context);
-                _showMessage('Dark Mode toggled');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_applications),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-                _showMessage('Settings');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('About'),
-              onTap: () {
-                Navigator.pop(context);
-                showAboutDialog(
-                    context: context,
-                    applicationName: 'Habit Tracker',
-                    applicationVersion: '1.0.0');
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Sign Out',
-                style: TextStyle(color: Colors.red),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _logout();
+                _signOut(context);
               },
             ),
           ],
@@ -366,17 +278,27 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AddHabitScreen(),
+                    builder: (context) => AddHabitScreen(),
                   ),
                 ).then((_) {
-                  _loadUserData(); // Reload data after returning
+                  _loadUserData();
                 });
               },
-              child: const Icon(Icons.add),
               backgroundColor: Colors.blue.shade700,
               tooltip: 'Add Habits',
+              child: const Icon(Icons.add),
             )
           : null,
+    );
+  }
+
+  void _signOut(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
     );
   }
 
@@ -385,8 +307,8 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       color: color,
-      child: SizedBox(
-        height: 60, // Adjust the height for thicker cards.
+      child: Container(
+        height: 60,
         child: ListTile(
           title: Text(
             title.toUpperCase(),
