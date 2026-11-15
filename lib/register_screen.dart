@@ -18,6 +18,8 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   double _age = 25;
   String _country = 'United States';
   List<String> _countries = [];
@@ -94,8 +96,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_nameController.text.trim().isEmpty ||
-        _usernameController.text.trim().isEmpty) {
-      _showToast('Please fill Name and Username');
+        _usernameController.text.trim().isEmpty ||
+        _emailController.text.trim().isEmpty ||
+        _passwordController.text.trim().isEmpty) {
+      _showToast('Please fill Name, Username, Email and Password');
+      return;
+    }
+    if (!_emailController.text.contains('@')) {
+      _showToast('Please enter a valid email');
+      return;
+    }
+    if (_passwordController.text.length < 6) {
+      _showToast('Password must be at least 6 characters');
       return;
     }
     if (selectedHabits.isEmpty) {
@@ -105,6 +117,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final String name = _nameController.text.trim();
     final String username = _usernameController.text.trim();
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -119,6 +133,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     await prefs.setString('name', name);
     await prefs.setString('username', username);
+    await prefs.setString('email', email);
+    await prefs.setString('password', password);
     await prefs.setDouble('age', _age);
     await prefs.setString('country', _country);
     await prefs.setString('selectedHabitsMap', jsonEncode(selectedHabitsMap));
@@ -174,6 +190,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 10),
                 _buildInputField(
                     _usernameController, 'Username', Icons.alternate_email),
+                const SizedBox(height: 10),
+                _buildInputField(_emailController, 'Email', Icons.email,
+                    isEmail: true),
+                const SizedBox(height: 10),
+                _buildInputField(_passwordController, 'Password', Icons.lock,
+                    isPassword: true),
                 const SizedBox(height: 10),
                 Text('Age: ${_age.round()}',
                     style: const TextStyle(color: Colors.white, fontSize: 18)),
@@ -236,12 +258,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           horizontal: 80, vertical: 15),
                     ),
                     child: const Text(
-                      'Register',
+                      'Sign-up',
                       style: TextStyle(
                         fontSize: 18,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LoginScreen()),
+                      );
+                    },
+                    child: const Text(
+                      'Already have an account? Login',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
                     ),
                   ),
                 ),
@@ -254,7 +292,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Widget _buildInputField(
-      TextEditingController controller, String hint, IconData icon) {
+      TextEditingController controller, String hint, IconData icon,
+      {bool isEmail = false, bool isPassword = false}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -262,6 +301,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       child: TextField(
         controller: controller,
+        obscureText: isPassword,
+        keyboardType:
+            isEmail ? TextInputType.emailAddress : TextInputType.text,
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: Colors.blue.shade700),
           hintText: hint,
