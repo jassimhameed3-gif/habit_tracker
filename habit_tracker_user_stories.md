@@ -37,19 +37,7 @@ _As a user, I want to mark a habit as complete for today, so that I can track my
 **Notes:**
 - Completion is saved per day, not permanently.
 
-## US4: Track Streak and Progress
-**Title:**
-_As a user, I want to see my streak and progress, so that I stay motivated._
-**Acceptance Criteria:**
-1. Streak counter shows consecutive days completed.
-2. Progress bar shows weekly completion percentage.
-3. Streak resets if a day is missed.
-**Priority:** Medium
-**Story Points:** 5
-**Notes:**
-- Streak should handle weekly habits differently from daily habits.
-
-## US5: Edit a Habit
+## US4: Edit a Habit
 **Title:**
 _As a user, I want to edit an existing habit, so that I can update its details._
 **Acceptance Criteria:**
@@ -61,7 +49,7 @@ _As a user, I want to edit an existing habit, so that I can update its details._
 **Notes:**
 - Editing should not delete progress.
 
-## US6: Delete a Habit
+## US5: Delete a Habit
 **Title:**
 _As a user, I want to delete a habit I no longer need, so that my list stays clean._
 **Acceptance Criteria:**
@@ -73,31 +61,7 @@ _As a user, I want to delete a habit I no longer need, so that my list stays cle
 **Notes:**
 - Deletion should be permanent with confirmation.
 
-## US7: Set Reminders
-**Title:**
-_As a user, I want to set a reminder for a habit, so that I don't forget to do it._
-**Acceptance Criteria:**
-1. User can set time and days for reminder.
-2. Notification appears at the set time.
-3. User can turn reminder on/off.
-**Priority:** High
-**Story Points:** 3
-**Notes:**
-- Reminders use local notifications.
-
-## US8: View Habit Details
-**Title:**
-_As a user, I want to view the details of a habit, so that I can see its history and progress._
-**Acceptance Criteria:**
-1. User can tap a habit to open its Detail Screen.
-2. Detail Screen shows name, description, streak, and calendar history.
-3. User can edit or delete from Detail Screen.
-**Priority:** High
-**Story Points:** 3
-**Notes:**
-- Detail Screen is reached from Home Screen.
-
-## US9: Login / Register
+## US6: Login / Register
 **Title:**
 _As a new user, I want to create an account and log in, so that my habits are saved to my account._
 **Acceptance Criteria:**
@@ -110,7 +74,7 @@ _As a new user, I want to create an account and log in, so that my habits are sa
 **Notes:**
 - Login Screen is the first screen for logged-out users.
 
-## US10: Settings Menu
+## US7: Settings Menu
 **Title:**
 _As a user, I want to open a Settings Menu, so that I can change app preferences._
 **Acceptance Criteria:**
@@ -122,7 +86,7 @@ _As a user, I want to open a Settings Menu, so that I can change app preferences
 **Notes:**
 - Settings Menu is accessible from all main screens.
 
-## US11: Change Settings
+## US8: Change Settings
 **Title:**
 _As a user, I want to change app settings, so that the app fits my preferences._
 **Acceptance Criteria:**
@@ -135,19 +99,7 @@ _As a user, I want to change app settings, so that the app fits my preferences._
 **Notes:**
 - Settings are saved per user.
 
-## US12: Persistent Data
-**Title:**
-_As a user, I want my habits and progress to be saved, so that I don't lose them when I close the app._
-**Acceptance Criteria:**
-1. All habits are saved to local database / cloud.
-2. Data is still there after closing and reopening the app.
-3. Completion history is not lost.
-**Priority:** High
-**Story Points:** 5
-**Notes:**
-- Data must persist across app restarts.
-
-## US13: External API Integration
+## US9: External API Integration
 **Title:**
 _As a user, I want to connect my habit tracker to my calendar, so that my habits appear in my schedule._
 **Acceptance Criteria:**
@@ -158,4 +110,3 @@ _As a user, I want to connect my habit tracker to my calendar, so that my habits
 **Story Points:** 8
 **Notes:**
 - Uses Google Calendar External API.
--
