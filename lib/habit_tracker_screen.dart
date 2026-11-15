@@ -22,6 +22,8 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
   Map<String, String> selectedHabitsMap = {};
   Map<String, String> completedHabitsMap = {};
   String name = '';
+  String username = '';
+  String email = '';
 
   @override
   void initState() {
@@ -33,6 +35,8 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       name = prefs.getString('name') ?? '';
+      username = prefs.getString('username') ?? widget.username;
+      email = prefs.getString('email') ?? '';
       selectedHabitsMap = Map<String, String>.from(
           jsonDecode(prefs.getString('selectedHabitsMap') ?? '{}'));
       completedHabitsMap = Map<String, String>.from(
@@ -90,12 +94,32 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
     return Color(int.parse(hexColor, radix: 16));
   }
 
+  String get _initial {
+    if (name.isNotEmpty) return name[0].toUpperCase();
+    if (username.isNotEmpty) return username[0].toUpperCase();
+    return 'U';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Welcome, $name'),
         backgroundColor: Colors.blue.shade700,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.white,
+              child: Text(
+                _initial,
+                style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -103,9 +127,30 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue.shade700),
-              child: Text(
-                'Hello, $name',
-                style: const TextStyle(color: Colors.white, fontSize: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      _initial,
+                      style: TextStyle(
+                          color: Colors.blue.shade700,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Hello, $name',
+                    style: const TextStyle(color: Colors.white, fontSize: 22),
+                  ),
+                  Text(
+                    email.isNotEmpty ? email : username,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ],
               ),
             ),
             ListTile(
